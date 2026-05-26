@@ -44,34 +44,38 @@
       </div>
     </div>
 
+    <!-- 설정 모달 -->
+    <div class="settings-overlay" id="settingsOverlay" style="display:none" role="dialog" aria-modal="true" aria-label="설정">
+      <div class="settings-card">
+        <div class="settings-header">
+          <h2>설정</h2>
+          <button class="settings-close" id="settingsClose" type="button" aria-label="닫기">✕</button>
+        </div>
+        <div class="settings-section">
+          <p class="settings-section-title">AI 코치 연결</p>
+          <p class="settings-desc">Google Gemini API 키를 입력하면 AI가 직접 맞춤 코치 메시지를 생성해줘요.<br><a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">무료 키 발급 →</a></p>
+          <div class="settings-field">
+            <input type="text" id="geminiKeyInput" placeholder="AIza로 시작하는 키를 붙여넣으세요" autocomplete="off" spellcheck="false" />
+          </div>
+          <div class="settings-btns">
+            <button class="primary-action settings-save-btn" id="geminiKeySave" type="button">저장</button>
+            <button class="settings-delete-btn" id="geminiKeyDelete" type="button">키 삭제</button>
+          </div>
+          <p class="settings-key-status" id="geminiKeyStatus"></p>
+        </div>
+
+        <div class="settings-section settings-section--divider">
+          <p class="settings-section-title">앱 안내</p>
+          <button class="settings-tutorial-btn" id="tutorialReplayBtn" type="button">튜토리얼 다시 보기</button>
+        </div>
+      </div>
+    </div>
+
     <!-- 토스트 메시지 -->
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <main class="app-shell">
       <section class="phone" aria-label="러닝마인드 AI 앱">
-
-        <!-- 설정 모달 (phone 안에서 오버레이) -->
-        <div class="settings-overlay" id="settingsOverlay" style="display:none" role="dialog" aria-modal="true" aria-label="설정">
-          <div class="settings-card">
-            <div class="settings-header">
-              <h2>설정</h2>
-              <button class="settings-close" id="settingsClose" type="button" aria-label="닫기">✕</button>
-            </div>
-
-            <div class="settings-section">
-              <p class="settings-section-title">AI 코치 연결</p>
-              <p class="settings-desc">Google Gemini API 키를 입력하면 AI가 직접 맞춤 코치 메시지를 생성해줘요.<br><a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">무료 키 발급 →</a></p>
-              <div class="settings-field">
-                <input type="text" id="geminiKeyInput" placeholder="AIza로 시작하는 키를 붙여넣으세요" autocomplete="off" spellcheck="false" />
-              </div>
-              <div class="settings-btns">
-                <button class="primary-action settings-save-btn" id="geminiKeySave" type="button">저장</button>
-                <button class="settings-delete-btn" id="geminiKeyDelete" type="button">키 삭제</button>
-              </div>
-              <p class="settings-key-status" id="geminiKeyStatus"></p>
-            </div>
-          </div>
-        </div>
         <header class="topbar">
           <div>
             <p class="eyebrow">오늘의 학습 시작</p>
@@ -965,6 +969,12 @@
         updateGeminiStatus();
         closeSettings();
         showToast("AI 코치가 연결됐어요.");
+      });
+
+      document.querySelector("#tutorialReplayBtn").addEventListener("click", () => {
+        try { localStorage.removeItem("learningMindOnboarded"); } catch {}
+        closeSettings();
+        document.querySelector("#onboardingOverlay").style.display = "";
       });
 
       document.querySelector("#geminiKeyDelete").addEventListener("click", () => {
