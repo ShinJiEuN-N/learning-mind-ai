@@ -1026,20 +1026,27 @@
   "reflectionPrompt": "회고 질문 (20자 이내)"
 }`;
 
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
-          }
-        );
+        const reqBody = JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { thinkingConfig: { thinkingBudget: 0 } },
+        });
+
+        let res;
+        for (let attempt = 0; attempt < 2; attempt++) {
+          if (attempt > 0) await new Promise((r) => setTimeout(r, 1500));
+          res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
+            { method: "POST", headers: { "Content-Type": "application/json" }, body: reqBody }
+          );
+          if (res.status !== 503) break;
+        }
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
           const msg = errData?.error?.message || `HTTP ${res.status}`;
           if (res.status === 400) throw new Error(`키 형식 오류: ${msg}`);
           if (res.status === 403) throw new Error("API 키가 유효하지 않아요. 설정에서 키를 확인해 주세요.");
           if (res.status === 429) throw new Error("요청이 너무 많아요. 잠시 후 다시 시도해 주세요.");
+          if (res.status === 503) throw new Error("Gemini 서버가 잠시 바빠요. 다시 시도해 주세요.");
           throw new Error(`API 오류 (${res.status}): ${msg}`);
         }
         const data = await res.json();
