@@ -1,9 +1,8 @@
-const CACHE_NAME = "learningmind-v4";
+const CACHE_NAME = "learningmind-v5";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
-  "./app.js",
   "./manifest.json"
 ];
 
@@ -23,8 +22,16 @@ self.addEventListener("activate", (e) => {
   self.clients.claim();
 });
 
+// 네트워크 우선 → 실패 시 캐시로 폴백 (항상 최신 버전 우선)
 self.addEventListener("fetch", (e) => {
+  if (e.request.method !== "GET") return;
   e.respondWith(
-    caches.match(e.request).then((cached) => cached || fetch(e.request))
+    fetch(e.request)
+      .then((res) => {
+        const clone = res.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
+        return res;
+      })
+      .catch(() => caches.match(e.request))
   );
 });
