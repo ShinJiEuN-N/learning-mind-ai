@@ -106,6 +106,7 @@ html,
 body {
   overflow-x: hidden;
   max-width: 100%;
+  overscroll-behavior-x: none;
 }
 
 body {
