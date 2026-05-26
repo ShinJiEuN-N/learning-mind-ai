@@ -44,31 +44,34 @@
       </div>
     </div>
 
-    <!-- 설정 모달 -->
-    <div class="settings-overlay" id="settingsOverlay" style="display:none" role="dialog" aria-modal="true" aria-label="설정">
-      <div class="settings-card">
-        <div class="settings-header">
-          <h2>설정</h2>
-          <button class="settings-close" id="settingsClose" type="button" aria-label="닫기">✕</button>
-        </div>
-
-        <div class="settings-section">
-          <p class="settings-section-title">AI 코치 연결</p>
-          <p class="settings-desc">Google Gemini API 키를 입력하면 AI가 직접 맞춤 코치 메시지를 생성해줘요.<br><a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">무료 키 발급 →</a></p>
-          <div class="settings-field">
-            <input type="password" id="geminiKeyInput" placeholder="AIza..." autocomplete="off" />
-            <button class="primary-action settings-save-btn" id="geminiKeySave" type="button">저장</button>
-          </div>
-          <p class="settings-key-status" id="geminiKeyStatus"></p>
-        </div>
-      </div>
-    </div>
-
     <!-- 토스트 메시지 -->
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <main class="app-shell">
       <section class="phone" aria-label="러닝마인드 AI 앱">
+
+        <!-- 설정 모달 (phone 안에서 오버레이) -->
+        <div class="settings-overlay" id="settingsOverlay" style="display:none" role="dialog" aria-modal="true" aria-label="설정">
+          <div class="settings-card">
+            <div class="settings-header">
+              <h2>설정</h2>
+              <button class="settings-close" id="settingsClose" type="button" aria-label="닫기">✕</button>
+            </div>
+
+            <div class="settings-section">
+              <p class="settings-section-title">AI 코치 연결</p>
+              <p class="settings-desc">Google Gemini API 키를 입력하면 AI가 직접 맞춤 코치 메시지를 생성해줘요.<br><a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">무료 키 발급 →</a></p>
+              <div class="settings-field">
+                <input type="text" id="geminiKeyInput" placeholder="AIza로 시작하는 키를 붙여넣으세요" autocomplete="off" spellcheck="false" />
+              </div>
+              <div class="settings-btns">
+                <button class="primary-action settings-save-btn" id="geminiKeySave" type="button">저장</button>
+                <button class="settings-delete-btn" id="geminiKeyDelete" type="button">키 삭제</button>
+              </div>
+              <p class="settings-key-status" id="geminiKeyStatus"></p>
+            </div>
+          </div>
+        </div>
         <header class="topbar">
           <div>
             <p class="eyebrow">오늘의 학습 시작</p>
@@ -957,10 +960,18 @@
 
       document.querySelector("#geminiKeySave").addEventListener("click", () => {
         const key = document.querySelector("#geminiKeyInput").value.trim();
+        if (!key) { showToast("키를 입력한 뒤 저장해 주세요."); return; }
         try { localStorage.setItem("learningMindGeminiKey", key); } catch {}
         updateGeminiStatus();
         closeSettings();
-        showToast(key ? "AI 코치가 연결됐어요." : "API 키를 지웠어요. 룰 기반 모드로 동작해요.");
+        showToast("AI 코치가 연결됐어요.");
+      });
+
+      document.querySelector("#geminiKeyDelete").addEventListener("click", () => {
+        try { localStorage.removeItem("learningMindGeminiKey"); } catch {}
+        document.querySelector("#geminiKeyInput").value = "";
+        updateGeminiStatus();
+        showToast("API 키를 삭제했어요. 룰 기반 모드로 동작해요.");
       });
 
       document.querySelector("#aiConnectBtn")?.addEventListener("click", openSettings);
@@ -1023,7 +1034,12 @@
         if (!cal) return;
         const today = new Date(); today.setHours(0,0,0,0);
         const days = 35;
-        const startDate = new Date(today); startDate.setDate(today.getDate() - days + 1);
+        // 오늘이 포함된 주의 일요일을 구한 뒤 2주 전부터 시작 → 오늘이 항상 3번째 줄 중앙에 위치
+        const todayWeekSun = new Date(today);
+        todayWeekSun.setDate(today.getDate() - today.getDay());
+        const startDate = new Date(todayWeekSun);
+        startDate.setDate(todayWeekSun.getDate() - 14);
+
         const dateMap = {};
         state.records.forEach((r) => {
           if (!r.savedAt) return;
@@ -1033,15 +1049,24 @@
           dateMap[key].total++;
           if (r.completed) dateMap[key].done++;
         });
-        let html = "";
-        for (let i = 0; i < days; i++) {
+
+        const dayLabels = ["일","월","화","수","목","금","토"];
+        let html = dayLabels.map((l) => `<div class="cal-dow">${l}</div>`).join("");
+
+        for (let i = 0; i < 35; i++) {
           const d = new Date(startDate); d.setDate(startDate.getDate() + i);
+          d.setHours(0,0,0,0);
           const key = d.toDateString();
           const info = dateMap[key];
+          const isToday = d.getTime() === today.getTime();
+          const isFuture = d > today;
           let cls = "cal-cell";
-          if (info) cls += info.done > 0 ? " cal-cell--done" : " cal-cell--tried";
-          const label = `${d.getMonth()+1}/${d.getDate()}`;
-          html += `<div class="${cls}" title="${label}${info ? ` (${info.done}/${info.total})` : ""}"></div>`;
+          if (isToday) cls += " cal-cell--today";
+          if (!isFuture && info) cls += info.done > 0 ? " cal-cell--done" : " cal-cell--tried";
+          if (isFuture) cls += " cal-cell--future";
+          const mmdd = `${d.getMonth()+1}/${d.getDate()}`;
+          const tooltip = `${mmdd}${info ? ` · 완료 ${info.done}/${info.total}` : ""}`;
+          html += `<div class="${cls}" title="${tooltip}"><span class="cal-date">${d.getDate()}</span></div>`;
         }
         cal.innerHTML = html;
       }
