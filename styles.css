@@ -1007,6 +1007,148 @@ body:has(#themeSwitch:checked) .completion-msg {
   color: #6ee0a2;
 }
 
+/* ── 온보딩 모달 ── */
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 20, 45, 0.6);
+  backdrop-filter: blur(4px);
+  display: grid;
+  place-items: center;
+  z-index: 100;
+  padding: 24px;
+}
+
+.onboarding-card {
+  width: min(100%, 360px);
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 32px 24px 24px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--line);
+}
+
+.onboarding-steps {
+  min-height: 180px;
+}
+
+.onboarding-step {
+  display: none;
+  text-align: center;
+}
+
+.onboarding-step.active {
+  display: block;
+}
+
+.onboarding-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  line-height: 1;
+}
+
+.onboarding-card h2 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.onboarding-card p {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
+.onboarding-dots {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  margin: 20px 0 24px;
+}
+
+.onboarding-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--line);
+  transition: background 180ms;
+}
+
+.onboarding-dot.active {
+  background: var(--accent);
+}
+
+.onboarding-actions {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.onboarding-skip {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 14px;
+  padding: 0 4px;
+}
+
+.onboarding-next {
+  min-height: 44px;
+  font-size: 15px;
+}
+
+/* ── 토스트 ── */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: var(--ink);
+  color: var(--surface);
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms, transform 220ms;
+  z-index: 200;
+}
+
+.toast--show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── 데이터 내보내기/가져오기 ── */
+.data-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.data-btn {
+  display: grid;
+  place-items: center;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--field);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+}
+
+.data-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 @media (max-width: 480px) {
   .app-shell {
     padding: 0;

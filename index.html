@@ -12,6 +12,41 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <!-- 온보딩 모달 -->
+    <div class="onboarding-overlay" id="onboardingOverlay" style="display:none" role="dialog" aria-modal="true" aria-label="앱 사용 안내">
+      <div class="onboarding-card">
+        <div class="onboarding-steps" id="onboardingSteps">
+          <div class="onboarding-step active" data-step="0">
+            <div class="onboarding-icon">📝</div>
+            <h2>마음 상태를 알려주세요</h2>
+            <p>오늘 할 공부, 막히는 이유, 지금 기분을 입력하면 지금 상태에 딱 맞는 계획을 만들어드려요.</p>
+          </div>
+          <div class="onboarding-step" data-step="1">
+            <div class="onboarding-icon">🗺️</div>
+            <h2>작은 계획을 받아요</h2>
+            <p>학습심리학에 기반한 3단계 계획과 타이머가 준비돼요. 끝낼 필요 없어요, 시작만 하면 돼요.</p>
+          </div>
+          <div class="onboarding-step" data-step="2">
+            <div class="onboarding-icon">📈</div>
+            <h2>나만의 패턴이 보여요</h2>
+            <p>기록이 쌓이면 어떤 감정일 때 잘 마치는지, 에너지 패턴이 어떤지 자동으로 분석해줘요.</p>
+          </div>
+        </div>
+        <div class="onboarding-dots" id="onboardingDots">
+          <span class="onboarding-dot active"></span>
+          <span class="onboarding-dot"></span>
+          <span class="onboarding-dot"></span>
+        </div>
+        <div class="onboarding-actions">
+          <button class="onboarding-skip" id="onboardingSkip" type="button">건너뛰기</button>
+          <button class="primary-action onboarding-next" id="onboardingNext" type="button">다음</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 토스트 메시지 -->
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
     <main class="app-shell">
       <section class="phone" aria-label="러닝마인드 AI 앱">
         <header class="topbar">
@@ -213,6 +248,14 @@
 
           <div class="record-list" id="recordList">
             <p class="empty-state">아직 저장된 기록이 없습니다.</p>
+          </div>
+
+          <div class="data-actions">
+            <button class="data-btn" id="exportBtn" type="button">기록 내보내기</button>
+            <label class="data-btn" id="importLabel">
+              기록 가져오기
+              <input type="file" id="importFile" accept=".json" style="display:none" />
+            </label>
           </div>
         </section>
       </section>
@@ -506,17 +549,26 @@
         document.querySelector("#completionMsg").style.display = "";
       }
 
+      function saveRecords() {
+        try {
+          localStorage.setItem("learningMindRecords", JSON.stringify(state.records));
+        } catch {
+          showToast("저장 공간이 부족해요. 오래된 기록을 지우면 다시 저장할 수 있어요.");
+        }
+      }
+
       function saveReflection(event) {
         event?.preventDefault();
         if (!state.currentPlan) return;
-        const reflection = document.querySelector("#reflectionInput").value.trim() || "회고를 남기지 않았습니다.";
+        const reflection = document.querySelector("#reflectionInput").value.trim() || "회고 없이 저장됐어요.";
         state.records.unshift({
           ...state.currentPlan,
           reflection,
           savedAt: new Date().toISOString(),
         });
-        localStorage.setItem("learningMindRecords", JSON.stringify(state.records));
+        saveRecords();
         document.querySelector("#reflectionInput").value = "";
+        showToast("기록을 저장했어요.");
         renderRecords();
         switchView("records");
       }
@@ -711,6 +763,83 @@
       document.querySelector("#pauseTimerButton").addEventListener("click", toggleTimer);
       document.querySelector("#finishSessionButton").addEventListener("click", finishSession);
       document.querySelector("#saveReflectionButton").addEventListener("click", saveReflection);
+
+      // ── 토스트 ──
+      function showToast(msg, duration = 2800) {
+        const toast = document.querySelector("#toast");
+        toast.textContent = msg;
+        toast.classList.add("toast--show");
+        setTimeout(() => toast.classList.remove("toast--show"), duration);
+      }
+
+      // ── 데이터 내보내기 ──
+      document.querySelector("#exportBtn").addEventListener("click", () => {
+        if (!state.records.length) { showToast("내보낼 기록이 없어요."); return; }
+        const blob = new Blob([JSON.stringify(state.records, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `learningmind-records-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast("기록을 내보냈어요.");
+      });
+
+      // ── 데이터 가져오기 ──
+      document.querySelector("#importFile").addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const imported = JSON.parse(ev.target.result);
+            if (!Array.isArray(imported)) throw new Error("올바른 형식이 아니에요.");
+            const merged = [...imported, ...state.records].reduce((acc, r) => {
+              if (!acc.find((x) => x.createdAt === r.createdAt)) acc.push(r);
+              return acc;
+            }, []);
+            state.records = merged;
+            saveRecords();
+            renderRecords();
+            showToast(`${imported.length}개 기록을 가져왔어요.`);
+          } catch {
+            showToast("파일을 읽는 중 오류가 생겼어요. JSON 파일인지 확인해주세요.");
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = "";
+      });
+
+      // ── 온보딩 ──
+      const onboardingOverlay = document.querySelector("#onboardingOverlay");
+      let currentStep = 0;
+      const totalSteps = 3;
+
+      function updateOnboarding() {
+        document.querySelectorAll(".onboarding-step").forEach((s, i) => s.classList.toggle("active", i === currentStep));
+        document.querySelectorAll(".onboarding-dot").forEach((d, i) => d.classList.toggle("active", i === currentStep));
+        const nextBtn = document.querySelector("#onboardingNext");
+        nextBtn.textContent = currentStep === totalSteps - 1 ? "시작하기" : "다음";
+      }
+
+      document.querySelector("#onboardingNext").addEventListener("click", () => {
+        if (currentStep < totalSteps - 1) {
+          currentStep++;
+          updateOnboarding();
+        } else {
+          onboardingOverlay.style.display = "none";
+          try { localStorage.setItem("learningMindOnboarded", "1"); } catch {}
+        }
+      });
+
+      document.querySelector("#onboardingSkip").addEventListener("click", () => {
+        onboardingOverlay.style.display = "none";
+        try { localStorage.setItem("learningMindOnboarded", "1"); } catch {}
+      });
+
+      if (!localStorage.getItem("learningMindOnboarded")) {
+        onboardingOverlay.style.display = "";
+      }
 
       if (localStorage.getItem("learningMindTheme") === "dark") {
         applyTheme(true);
