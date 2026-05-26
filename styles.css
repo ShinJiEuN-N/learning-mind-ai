@@ -1182,3 +1182,280 @@ body:has(#themeSwitch:checked) .completion-msg {
     height: 76px;
   }
 }
+
+/* ─────────────────────────────────────────
+   Phase C: 상단바 버튼 그룹 & 설정 모달
+───────────────────────────────────────── */
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.settings-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--muted);
+  padding: 6px 8px;
+  border-radius: 8px;
+  transition: background 0.15s;
+  line-height: 1;
+}
+.settings-btn:hover { background: var(--surface-2); }
+
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 8px 16px;
+}
+.settings-card {
+  background: var(--surface);
+  border-radius: 20px 20px 16px 16px;
+  width: 100%;
+  max-width: 420px;
+  padding: 24px 20px 28px;
+  box-shadow: 0 -4px 32px rgba(0,0,0,0.18);
+}
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.settings-header h2 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+}
+.settings-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 17px;
+  color: var(--muted);
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+.settings-close:hover { background: var(--surface-2); }
+.settings-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 0 0 6px;
+}
+.settings-desc {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+.settings-desc a { color: var(--accent); text-decoration: none; }
+.settings-desc a:hover { text-decoration: underline; }
+.settings-field {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.settings-field input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 14px;
+  font-family: inherit;
+}
+.settings-field input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.settings-save-btn {
+  padding: 10px 16px;
+  font-size: 14px;
+  white-space: nowrap;
+  border-radius: 10px;
+}
+.settings-key-status {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 8px 0 0;
+  min-height: 16px;
+}
+.settings-key-status--on {
+  color: #4ade80;
+  font-weight: 600;
+}
+
+/* 스켈레톤 로딩 */
+.skeleton-block {
+  height: 20px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--border) 25%, var(--surface-2) 50%, var(--border) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s infinite;
+  margin-bottom: 10px;
+}
+.skeleton-block--short { width: 65%; height: 14px; }
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* AI 코치 연결 배너 */
+.ai-connect-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--surface-2);
+  border: 1.5px dashed var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.ai-connect-banner button {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* ─────────────────────────────────────────
+   Phase B: 과목 자동완성 datalist
+───────────────────────────────────────── */
+input[list] { cursor: auto; }
+
+/* ─────────────────────────────────────────
+   Phase B: 주간 학습 달력
+───────────────────────────────────────── */
+.activity-calendar-section {
+  background: var(--surface-2);
+  border-radius: 14px;
+  padding: 14px 16px 12px;
+  margin-bottom: 12px;
+}
+.activity-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin: 8px 0 6px;
+}
+.cal-cell {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  background: var(--border);
+  cursor: default;
+  transition: transform 0.12s;
+}
+.cal-cell--done  { background: var(--accent); }
+.cal-cell--tried { background: color-mix(in srgb, var(--accent) 45%, transparent); }
+.calendar-legend {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 11px;
+  color: var(--muted);
+}
+.cal-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+.cal-dot--empty  { background: var(--border); }
+.cal-dot--done   { background: var(--accent); }
+.cal-dot--tried  { background: color-mix(in srgb, var(--accent) 45%, transparent); }
+
+/* ─────────────────────────────────────────
+   Phase B: 주간 목표
+───────────────────────────────────────── */
+.weekly-goal-section {
+  background: var(--surface-2);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.weekly-goal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.weekly-goal-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.weekly-goal-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.goal-adj {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+  transition: background 0.15s;
+}
+.goal-adj:hover { background: var(--border); }
+.weekly-goal-progress { display: flex; align-items: center; gap: 10px; }
+.weekly-goal-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.weekly-goal-bar > div {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 99px;
+  transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  width: 0%;
+}
+#weeklyGoalStatus {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ─────────────────────────────────────────
+   Phase A: 탭 전환 애니메이션
+───────────────────────────────────────── */
+@keyframes view-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.view.active {
+  animation: view-enter 0.18s ease-out both;
+}

@@ -1,4 +1,4 @@
-const CACHE_NAME = "learningmind-v2";
+const CACHE_NAME = "learningmind-v3";
 const ASSETS = [
   "./",
   "./index.html",
