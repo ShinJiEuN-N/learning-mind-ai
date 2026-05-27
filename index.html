@@ -167,13 +167,14 @@
               </label>
 
               <label class="field">
-                <span>예상 집중 가능 시간 <strong id="timeValue">30분</strong></span>
-                <input id="timeInput" type="range" min="10" max="30" step="10" value="30" />
-                <div class="scale-ticks" aria-hidden="true">
-                  <span>10분</span>
-                  <span>20분</span>
-                  <span>30분</span>
-                </div>
+                <span>예상 집중 가능 시간</span>
+                <select id="timeInput">
+                  <option value="10">10분</option>
+                  <option value="15">15분</option>
+                  <option value="20">20분</option>
+                  <option value="25">25분</option>
+                  <option value="30" selected>30분</option>
+                </select>
               </label>
             </div>
 
@@ -484,8 +485,6 @@
       function updateReadiness() {
         const energy = Number(document.querySelector("#energyInput").value);
         const time = Number(document.querySelector("#timeInput").value);
-        const timeValueEl = document.querySelector("#timeValue");
-        if (timeValueEl) timeValueEl.textContent = time + "분";
         const mood = selected("mood") || "불안";
         const moodPenalty = { 보통: 0, 지루함: 7, 좌절: 10, 무기력: 11, 압도: 12, 불안: 12 }[mood] ?? 8;
         const score = Math.max(20, Math.min(95, Math.round(22 + energy * 7 + (Math.min(time, 30) / 30) * 18 - moodPenalty)));
