@@ -476,10 +476,10 @@
       };
 
       const readinessLabels = [
-        { max: 39, text: "오늘은 2분만 해봐요. 작은 시작도 충분해요." },
-        { max: 59, text: "시작하면 흐름이 생겨요. 일단 앉아볼게요." },
-        { max: 79, text: "오늘 컨디션 괜찮아요. 해볼 수 있어요." },
-        { max: 100, text: "오늘 컨디션 정말 좋아요. 도전하고 싶었던 것 해봐요." },
+        { max: 39, text: "오늘은 2분만 해봐요.<br>작은 시작도 충분해요." },
+        { max: 59, text: "시작하면 흐름이 생겨요.<br>일단 앉아볼게요." },
+        { max: 79, text: "오늘 컨디션 괜찮아요.<br>해볼 수 있어요." },
+        { max: 100, text: "오늘 컨디션 정말 좋아요.<br>도전하고 싶었던 것 해봐요." },
       ];
 
       function updateReadiness() {
@@ -494,7 +494,7 @@
         document.querySelector(".ring-progress").style.strokeDashoffset = String(RING_CIRCUMFERENCE * (1 - score / 100));
 
         const labelEntry = readinessLabels.find((l) => score <= l.max);
-        document.querySelector("#readinessLabel").textContent = labelEntry ? labelEntry.text : readinessLabels[3].text;
+        document.querySelector("#readinessLabel").innerHTML = labelEntry ? labelEntry.text : readinessLabels[3].text;
 
         document.querySelector("#energyHint").textContent = energyHints[energy] || "";
 
