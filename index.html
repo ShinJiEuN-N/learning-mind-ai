@@ -19,7 +19,7 @@
           <div class="onboarding-step active" data-step="0">
             <div class="onboarding-icon">📝</div>
             <h2>마음 상태를 알려주세요</h2>
-            <p>오늘 할 공부, 막히는 이유, 지금 기분을 입력하면 지금 상태에 딱 맞는 계획을 만들어드려요.</p>
+            <p>오늘 할 공부, 가장 신경쓰이는 것, 지금 기분을 입력하면 지금 상태에 딱 맞는 계획을 만들어드려요.</p>
           </div>
           <div class="onboarding-step" data-step="1">
             <div class="onboarding-icon">🗺️</div>
@@ -128,7 +128,7 @@
             </label>
 
             <fieldset class="field">
-              <legend>막히는 이유</legend>
+              <legend>가장 신경쓰이는 것</legend>
               <div class="chip-grid" id="reasonGroup">
                 <label><input type="radio" name="reason" value="unclear" checked /> 시작점이 안 보임</label>
                 <label><input type="radio" name="reason" value="anxiety" /> 실패할까 걱정됨</label>
@@ -1010,7 +1010,7 @@
         const prompt = `당신은 학습심리학 기반의 따뜻한 학습 코치입니다.
 사용자 상태:
 - 오늘 공부: ${subject}
-- 막히는 이유: ${reasonLabels[reason] || reason}
+- 가장 신경쓰이는 것: ${reasonLabels[reason] || reason}
 - 지금 기분: ${mood}
 - 에너지 수준: ${energy}/7
 - 집중 가능 시간: ${focusTime}분
