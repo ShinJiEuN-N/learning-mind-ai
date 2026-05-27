@@ -1,25 +1,40 @@
 {
   "name": "러닝마인드 AI",
   "short_name": "러닝마인드",
-  "description": "학습심리학 기반의 작은 공부 계획 도우미",
-  "start_url": "./index.html",
+  "description": "학습심리학 기반의 작은 공부 계획 도우미. AI 코치가 오늘 기분과 에너지에 맞는 맞춤 학습 계획을 만들어드려요.",
+  "start_url": "/learning-mind-ai/index.html",
+  "scope": "/learning-mind-ai/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#fff3f8",
   "theme_color": "#ff7aa8",
   "lang": "ko",
+  "categories": ["education", "productivity"],
+  "screenshots": [],
   "icons": [
     {
       "src": "icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
