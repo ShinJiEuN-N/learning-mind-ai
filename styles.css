@@ -1029,7 +1029,7 @@ body:has(#themeSwitch:checked) .flow-tile--done .flow-status {
 /* ???? ?? ??? ??? ???? */
 .plan-list li {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
 }
@@ -1602,4 +1602,96 @@ input[list] { cursor: auto; }
 }
 .view.active {
   animation: view-enter 0.18s ease-out both;
+}
+
+/* ── 스트릭 배지 ── */
+.streak-badge {
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--warm);
+}
+
+/* ── 계획 스텝 체크박스 ── */
+.plan-list li {
+  align-items: flex-start;
+}
+.step-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex: 1;
+  cursor: pointer;
+  width: 100%;
+}
+.plan-step-cb {
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+}
+.plan-step-cb:checked ~ .step-text {
+  text-decoration: line-through;
+  opacity: 0.45;
+}
+
+/* ── 기록 삭제 버튼 ── */
+.record-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.delete-record-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: color 0.15s, background 0.15s;
+}
+.delete-record-btn:hover {
+  color: #e03;
+  background: rgba(220, 0, 51, 0.08);
+}
+
+/* ── 세션 저장 후 버튼 ── */
+.post-save-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+.secondary-btn {
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s, background 0.15s;
+}
+.secondary-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* ── 과목 필터 ── */
+.filter-bar {
+  margin-bottom: 12px;
+}
+.filter-select {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 36px 8px 12px;
+  border-radius: 999px;
+  width: auto;
 }

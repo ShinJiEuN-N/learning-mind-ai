@@ -100,7 +100,7 @@
           <section class="hero-panel">
             <p class="eyebrow">오늘의 준비도</p>
             <h2 id="comfortQuote">오늘은 다시 시작하는 하루여도 충분해요.</h2>
-            <div class="hero-content">
+              <div class="hero-content">
               <div class="readiness-ring" aria-label="학습 시작 준비도">
                 <svg viewBox="0 0 100 100" aria-hidden="true">
                   <defs>
@@ -115,7 +115,10 @@
                 </svg>
                 <span class="ring-label"><span id="ringValue">42</span><small>%</small></span>
               </div>
-              <p id="readinessLabel">지금 상태에 맞는 작은 첫 행동을 찾아드릴게요.</p>
+              <div>
+                <p id="readinessLabel">지금 상태에 맞는 작은 첫 행동을 찾아드릴게요.</p>
+                <p id="streakBadge" style="display:none" class="streak-badge">🔥 <span id="streakCount">0</span>일 연속 학습 중</p>
+              </div>
             </div>
           <p class="personal-hint" id="personalHint" style="display:none"></p>
           </section>
@@ -229,6 +232,10 @@
               <textarea id="reflectionInput" rows="3" placeholder="예: 시작하니 생각보다 괜찮았다."></textarea>
             </label>
             <button class="primary-action" id="saveReflectionButton" type="button">저장하기</button>
+            <div id="postSaveActions" style="display:none" class="post-save-actions">
+              <button class="primary-action" id="newSessionBtn" type="button">새 세션 시작하기</button>
+              <button class="secondary-btn" id="viewRecordsBtn" type="button">기록 보기</button>
+            </div>
           </section>
         </section>
 
@@ -307,6 +314,12 @@
             <div class="flow-grid" id="recentFlow" aria-label="최근 7세션 흐름"></div>
           </div>
 
+          <div class="filter-bar" id="filterBar" style="display:none">
+            <select id="subjectFilter" class="filter-select">
+              <option value="">전체 과목</option>
+            </select>
+          </div>
+
           <div class="record-list" id="recordList">
             <p class="empty-state">아직 저장된 기록이 없습니다.</p>
           </div>
@@ -335,6 +348,14 @@
           "불안해도 시작할 수 있어요.",
           "오늘은 증명보다 부담을 덜어내는 날이에요.",
           "천천히 해도 흐름은 다시 만들어져요.",
+          "완벽하지 않아도 오늘의 나는 충분히 잘하고 있어요.",
+          "조금만 해도, 안 한 것보다 훨씬 앞에 있어요.",
+          "시작이 어려운 날일수록, 시작한 것이 빛나요.",
+          "지금 이 순간도 공부의 일부예요.",
+          "흔들려도 괜찮아요. 결국 다시 돌아오고 있잖아요.",
+          "오늘의 작은 시도가 내일을 조금 더 쉽게 만들어요.",
+          "기분이 공부를 결정하지 않아요. 행동이 결정해요.",
+          "완료보다 시작에 집중해요. 나머지는 따라와요.",
         ];
         const previous = Number(localStorage.getItem("comfortQuoteIndex") ?? "-1");
         const next = (previous + 1) % quotes.length;
@@ -349,6 +370,8 @@
         timer: null,
         secondsLeft: 0,
         running: false,
+        sessionSaved: false,
+        subjectFilter: "",
         records: JSON.parse(localStorage.getItem("learningMindRecords") || "[]"),
       };
 
@@ -439,7 +462,42 @@
 
       const selected = (name) => document.querySelector(`input[name="${name}"]:checked`)?.value;
 
+      function calcStreak(recs) {
+        if (!recs.length) return 0;
+        const uniqueDates = [...new Set(
+          recs.map((r) => r.savedAt ? new Date(r.savedAt).toDateString() : null).filter(Boolean)
+        )].sort((a, b) => new Date(b) - new Date(a));
+        if (!uniqueDates.length) return 0;
+        const mostRecent = new Date(uniqueDates[0]);
+        mostRecent.setHours(0, 0, 0, 0);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if ((today - mostRecent) / 86400000 > 1) return 0;
+        let streak = 1;
+        for (let i = 1; i < uniqueDates.length; i++) {
+          const prev = new Date(uniqueDates[i - 1]);
+          const curr = new Date(uniqueDates[i]);
+          if (Math.round((prev - curr) / 86400000) === 1) streak++;
+          else break;
+        }
+        return streak;
+      }
+
+      function updateStreakBadge() {
+        const streak = calcStreak(state.records);
+        const badge = document.querySelector("#streakBadge");
+        if (streak >= 2) {
+          document.querySelector("#streakCount").textContent = streak;
+          badge.style.display = "";
+        } else {
+          badge.style.display = "none";
+        }
+      }
+
       function switchView(name) {
+        if (name !== "coach" && state.currentPlan && !state.sessionSaved) {
+          if (!confirm("현재 세션이 저장되지 않았어요. 이동하면 기록이 사라져요. 계속할까요?")) return;
+        }
         document.querySelectorAll(".tab").forEach((tab) => tab.classList.toggle("active", tab.dataset.view === name));
         document.querySelectorAll(".view").forEach((view) => view.classList.remove("active"));
         document.querySelector(`#${name}View`)?.classList.add("active");
@@ -585,7 +643,7 @@
           document.querySelector("#coachMessage").textContent = aiResult.message;
           document.querySelector("#planDuration").textContent = `${duration}분`;
           document.querySelector("#planList").innerHTML = (aiResult.steps || []).map((s) =>
-            `<li><span class="step-text">${s}</span></li>`
+            `<li><label class="step-check"><input type="checkbox" class="plan-step-cb" /><span class="step-text">${s}</span></label></li>`
           ).join("");
           if (aiResult.reflectionPrompt) {
             document.querySelector("#reflectionPromptLabel").textContent = aiResult.reflectionPrompt;
@@ -600,7 +658,7 @@
           document.querySelector("#coachMessage").textContent = `${subject}를 끝내는 것이 아니라 시작하는 데 집중해요. ${pattern.message}`;
           document.querySelector("#planDuration").textContent = `${duration}분`;
           document.querySelector("#planList").innerHTML = pattern.steps.map((s) =>
-            `<li><span class="step-text">${s.text}</span><span class="step-tag">${s.tag}</span></li>`
+            `<li><label class="step-check"><input type="checkbox" class="plan-step-cb" /><span class="step-text">${s.text}</span><span class="step-tag">${s.tag}</span></label></li>`
           ).join("");
           const badge = document.querySelector("#strategyBadge");
           badge.textContent = strategyBadges[reason] || "";
@@ -662,16 +720,24 @@
         event?.preventDefault();
         if (!state.currentPlan) return;
         const reflection = document.querySelector("#reflectionInput").value.trim() || "회고 없이 저장됐어요.";
+        const prevWeekCount = getThisWeekCount();
         state.records.unshift({
           ...state.currentPlan,
           reflection,
           savedAt: new Date().toISOString(),
         });
         saveRecords();
+        state.sessionSaved = true;
+        const newWeekCount = getThisWeekCount();
         document.querySelector("#reflectionInput").value = "";
         showToast("기록을 저장했어요.");
         renderRecords();
-        switchView("records");
+        updateStreakBadge();
+        document.querySelector("#saveReflectionButton").style.display = "none";
+        document.querySelector("#postSaveActions").style.display = "";
+        if (newWeekCount >= weeklyGoal && prevWeekCount < weeklyGoal) {
+          setTimeout(() => { showToast("🎉 이번 주 목표를 달성했어요! 정말 잘했어요.", 4000); playChime(); }, 600);
+        }
       }
 
       function renderRecords() {
@@ -687,26 +753,6 @@
         document.querySelector("#totalMinutes").textContent = `${totalMinutes}분`;
 
         // ── 연속 학습 횟수 (날짜 기준 스트릭) ──
-        function calcStreak(recs) {
-          if (!recs.length) return 0;
-          const uniqueDates = [...new Set(
-            recs.map((r) => r.savedAt ? new Date(r.savedAt).toDateString() : null).filter(Boolean)
-          )].sort((a, b) => new Date(b) - new Date(a));
-          if (!uniqueDates.length) return 0;
-          const mostRecent = new Date(uniqueDates[0]);
-          mostRecent.setHours(0, 0, 0, 0);
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          if ((today - mostRecent) / 86400000 > 1) return 0;
-          let streak = 1;
-          for (let i = 1; i < uniqueDates.length; i++) {
-            const prev = new Date(uniqueDates[i - 1]);
-            const curr = new Date(uniqueDates[i]);
-            if (Math.round((prev - curr) / 86400000) === 1) streak++;
-            else break;
-          }
-          return streak;
-        }
         const streak = calcStreak(records);
         document.querySelector("#streakDays").textContent = `${streak}일`;
 
@@ -809,10 +855,29 @@
         renderWeeklyGoal();
         updateSubjectSuggestions();
 
+        // ── 과목 필터 ──
+        const filterBar = document.querySelector("#filterBar");
+        const subjectSelect = document.querySelector("#subjectFilter");
+        const allSubjects = [...new Set(records.map((r) => r.subject).filter(Boolean))];
+        if (allSubjects.length > 1) {
+          filterBar.style.display = "";
+          const curFilter = state.subjectFilter;
+          subjectSelect.innerHTML = `<option value="">전체 과목 (${records.length}회)</option>` +
+            allSubjects.map((s) => `<option value="${s}" ${s === curFilter ? "selected" : ""}>${s}</option>`).join("");
+        } else {
+          filterBar.style.display = "none";
+          state.subjectFilter = "";
+        }
+
         // ── 전체 기록 카드 ──
         const list = document.querySelector("#recordList");
-        if (!records.length) {
-          list.innerHTML = '<p class="empty-state">아직 저장된 기록이 없습니다.</p>';
+        const displayedRecords = state.subjectFilter
+          ? records.map((r, i) => [r, i]).filter(([r]) => r.subject === state.subjectFilter)
+          : records.map((r, i) => [r, i]);
+        if (!displayedRecords.length) {
+          list.innerHTML = records.length
+            ? '<p class="empty-state">해당 과목의 기록이 없습니다.</p>'
+            : '<p class="empty-state">아직 저장된 기록이 없습니다.</p>';
           return;
         }
         function formatDate(iso) {
@@ -825,11 +890,14 @@
             `<span class="e-dot${i < n ? " e-dot--on" : ""}"></span>`
           ).join("");
         }
-        list.innerHTML = records.map((r) => `
+        list.innerHTML = displayedRecords.map(([r, idx]) => `
           <article class="record-card">
             <div class="record-card-top">
               <strong>${r.subject}</strong>
-              <span class="status-badge ${r.completed ? "status-done" : "status-skip"}">${r.completed ? "완료" : "미완료"}</span>
+              <div class="record-card-actions">
+                <span class="status-badge ${r.completed ? "status-done" : "status-skip"}">${r.completed ? "완료" : "미완료"}</span>
+                <button class="delete-record-btn" data-idx="${idx}" type="button" aria-label="기록 삭제">✕</button>
+              </div>
             </div>
             <p>${r.reflection}</p>
             <div class="record-energy-row">
@@ -849,12 +917,53 @@
 
       function applyTheme(isDark) {
         document.body.classList.toggle("dark-mode", isDark);
-        document.querySelector("#themeSwitch")?.toggleAttribute("checked", isDark);
         localStorage.setItem("learningMindTheme", isDark ? "dark" : "light");
       }
 
       document.querySelectorAll(".tab").forEach((tab) => {
         tab.addEventListener("click", () => switchView(tab.dataset.view));
+      });
+
+      // ── 새 세션 시작 / 기록 보기 ──
+      document.querySelector("#newSessionBtn").addEventListener("click", () => {
+        state.currentPlan = null;
+        state.sessionSaved = false;
+        clearInterval(state.timer);
+        state.running = false;
+        document.querySelector("#saveReflectionButton").style.display = "";
+        document.querySelector("#postSaveActions").style.display = "none";
+        document.querySelector("#reflectionInput").value = "";
+        document.querySelector("#timerText").textContent = "00:00";
+        document.querySelector("#completionMsg").style.display = "none";
+        document.querySelector("#patternTitle").textContent = "입력을 먼저 완료해 주세요";
+        document.querySelector("#coachMessage").textContent = "오늘 할 공부와 마음 상태를 알려주면 바로 실행 가능한 작은 계획을 보여드려요.";
+        document.querySelector("#planList").innerHTML = "<li>입력을 마치면 맞춤 계획이 표시됩니다.</li>";
+        document.querySelector("#planDuration").textContent = "대기";
+        document.querySelector("#strategyBadge").style.display = "none";
+        switchView("checkin");
+      });
+      document.querySelector("#viewRecordsBtn").addEventListener("click", () => {
+        document.querySelector("#saveReflectionButton").style.display = "";
+        document.querySelector("#postSaveActions").style.display = "none";
+        switchView("records");
+      });
+
+      // ── 기록 삭제 (이벤트 위임) ──
+      document.querySelector("#recordList").addEventListener("click", (e) => {
+        const btn = e.target.closest(".delete-record-btn");
+        if (!btn) return;
+        if (!confirm("이 기록을 삭제할까요?")) return;
+        const idx = Number(btn.dataset.idx);
+        state.records.splice(idx, 1);
+        saveRecords();
+        renderRecords();
+        showToast("기록을 삭제했어요.");
+      });
+
+      // ── 과목 필터 ──
+      document.querySelector("#subjectFilter").addEventListener("change", (e) => {
+        state.subjectFilter = e.target.value;
+        renderRecords();
       });
       document.querySelector("#checkinForm").addEventListener("submit", createPlan);
       document.querySelector("#planButton").addEventListener("click", createPlan);
@@ -1113,7 +1222,7 @@
         const dayOfWeek = now.getDay();
         const weekStart = new Date(now); weekStart.setDate(now.getDate() - dayOfWeek);
         return state.records.filter((r) => {
-          if (!r.savedAt) return false;
+          if (!r.savedAt || !r.completed) return false;
           const d = new Date(r.savedAt); d.setHours(0,0,0,0);
           return d >= weekStart;
         }).length;
@@ -1187,6 +1296,7 @@
       updateReasonHint();
       updateSubjectSuggestions();
       updateGeminiStatus();
+      updateStreakBadge();
       renderRecords();
       })();
     </script>
