@@ -460,7 +460,27 @@ input[type="range"] {
 }
 
 #timeInput {
+  background: linear-gradient(90deg, #b8c6ff 0%, #d4a8ff 50%, #ffa8d4 100%) !important;
+}
+
+#timeInput::-webkit-slider-runnable-track {
   background: linear-gradient(90deg, #b8c6ff 0%, #d4a8ff 50%, #ffa8d4 100%);
+  height: 10px;
+  border-radius: 999px;
+}
+
+#timeInput::-moz-range-track {
+  background: linear-gradient(90deg, #b8c6ff 0%, #d4a8ff 50%, #ffa8d4 100%);
+  height: 10px;
+  border-radius: 999px;
+}
+
+#timeInput::-webkit-slider-thumb {
+  background: #9b7fd4;
+}
+
+#timeInput::-moz-range-thumb {
+  background: #9b7fd4;
 }
 
 input[type="range"]::-webkit-slider-thumb {
