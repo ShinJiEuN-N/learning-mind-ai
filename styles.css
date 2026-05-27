@@ -116,6 +116,8 @@ body {
     linear-gradient(150deg, var(--bg) 0%, #fff8df 48%, #e7f7ff 100%);
   color: var(--ink);
   font-family: Inter, "Pretendard", "Noto Sans KR", system-ui, sans-serif;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 [data-theme="dark"] body {
