@@ -3,8 +3,8 @@
   "target": {
     "namespace": "android_app",
     "package_name": "com.learningmindai.app",
-    "sha256_cert_fingerprints": [
-      "REPLACE_WITH_SHA256_FROM_PWABUILDER"
+      "sha256_cert_fingerprints": [
+      "A0:37:F4:B6:1F:94:A4:14:C8:DF:58:B1:63:8D:D1:5A:8B:4A:17:EF:F3:83:82:4E:D9:DB:C0:4A:53:92:CA:19"
     ]
   }
 }]
