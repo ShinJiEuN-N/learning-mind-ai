@@ -446,7 +446,34 @@ input:focus,
 select:focus,
 textarea:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(39, 122, 91, 0.12);
+  box-shadow: 0 0 0 3px rgba(255, 122, 168, 0.15);
+}
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image:
+    linear-gradient(to bottom, transparent 60%, rgba(255, 122, 168, 0.06) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ff7aa8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat, no-repeat;
+  background-position: left 0 top 0, right 14px center;
+  background-size: 100% 100%, 18px 18px;
+  padding-right: 42px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+}
+
+select:hover {
+  border-color: var(--accent);
+  background-color: var(--accent-soft);
+}
+
+body:has(#themeSwitch:checked) select {
+  background-image:
+    linear-gradient(to bottom, transparent 60%, rgba(255, 143, 188, 0.08) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ff8fbc' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
 }
 
 input[type="range"] {
