@@ -459,6 +459,10 @@ input[type="range"] {
   padding: 0;
 }
 
+#timeInput {
+  background: linear-gradient(90deg, #b8c6ff 0%, #d4a8ff 50%, #ffa8d4 100%);
+}
+
 input[type="range"]::-webkit-slider-thumb {
   appearance: none;
   width: 22px;
@@ -491,6 +495,11 @@ input[type="range"]::-moz-range-thumb {
   font-size: 11px;
   line-height: 1;
   margin-top: -2px;
+}
+
+#timeValue {
+  color: #9b7fd4;
+  font-weight: 700;
 }
 
 textarea {
